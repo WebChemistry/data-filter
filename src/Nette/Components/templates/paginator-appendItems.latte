@@ -1,0 +1,9 @@
+{*
+	bool    $ajax use ajax
+	string  $appendItemsCaption
+	string  $nextLink next link
+*}
+
+<div n:class="'data-filter-append-items', $containerClass">
+	<a href="{$nextLink}" n:class="$ajax ? 'ajax', $buttonClass">{$appendItemsCaption}</a>
+</div>

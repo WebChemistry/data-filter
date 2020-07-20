@@ -1,0 +1,14 @@
+{
+	"name": "webchemistry/data-filter",
+	"require": {
+		"php": ">= 7.4"
+	},
+	"require-dev": {
+		"nette/application": "^3.0.0"
+	},
+	"autoload": {
+		"psr-4": {
+			"WebChemistry\\DataFilter\\": "src"
+		}
+	}
+}
