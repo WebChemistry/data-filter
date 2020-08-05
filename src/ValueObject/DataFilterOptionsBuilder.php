@@ -40,6 +40,15 @@ final class DataFilterOptionsBuilder
 		$this->options['defaultOrderBy'] = $orderBy;
 	}
 
+	public function setFirstDefaultOrderBy(): void
+	{
+		if (!$this->options['orderBy']) {
+			throw new InvalidArgumentException('Order by must not be empty');
+		}
+
+		$this->options['defaultOrderBy'] = current($this->options['orderBy']);
+	}
+
 	public function setAjax(bool $ajax = true): void
 	{
 		$this->options['ajax'] = $ajax;
