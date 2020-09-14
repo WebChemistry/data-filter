@@ -26,6 +26,7 @@ final class DoctrineDataSource implements DataSourceInterface
 		$this->options = array_merge([
 			'hydrationMode' => AbstractQuery::HYDRATE_OBJECT,
 			'outputWalkers' => true,
+			'fetchJoinCollection' => null,
 		], $options);
 	}
 
@@ -50,7 +51,9 @@ final class DoctrineDataSource implements DataSourceInterface
 			$query = $this->queryBuilder->getQuery()
 				->setHydrationMode($this->options['hydrationMode']);
 
-			$this->paginator = new Paginator($query, !$this->isCompositeId());
+			$fetchJoinCollection = $this->options['fetchJoinCollection'] === null ? !$this->isCompositeId() : $this->options['fetchJoinCollection'];
+
+			$this->paginator = new Paginator($query, $fetchJoinCollection);
 			$this->paginator->setUseOutputWalkers($this->options['outputWalkers']);
 		}
 
