@@ -13,6 +13,11 @@ class DataFilter
 	/** @var callable(): DataSourceInterface */
 	private $dataSourceFactory;
 
+	/** @var callable(mixed $values): void */
+	private $dataDecorator;
+
+	private iterable $data;
+
 	private DataSourceInterface $dataSource;
 
 	private Paginator $paginator;
@@ -61,12 +66,20 @@ class DataFilter
 
 	public function getData(): iterable
 	{
-		$paginator = $this->getPaginator();
+		if (!isset($this->data)) {
+			$paginator = $this->getPaginator();
 
-		return $this->getDataSource()->getData(
-			$paginator === null ? null : $paginator->getLength(),
-			$paginator === null ? null : $paginator->getOffset()
-		);
+			$this->data = $this->getDataSource()->getData(
+				$paginator === null ? null : $paginator->getLength(),
+				$paginator === null ? null : $paginator->getOffset()
+			);
+
+			if ($this->dataDecorator) {
+				$this->data = ($this->dataDecorator)($this->data);
+			}
+		}
+
+		return $this->data;
 	}
 
 	public function getPaginator(): ?Paginator
@@ -84,6 +97,11 @@ class DataFilter
 		}
 
 		return $this->paginator;
+	}
+
+	public function setDataDecorator(callable $decorator): void
+	{
+		$this->dataDecorator = $decorator;
 	}
 
 }
