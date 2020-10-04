@@ -7,21 +7,22 @@ use Psr\EventDispatcher\StoppableEventInterface;
 final class StateChangedEvent implements StoppableEventInterface
 {
 
-	public const PAGINATE = 'paginate';
-	public const SEARCH = 'search';
-	public const ORDER_BY = 'orderBy';
-	public const RESET = 'reset';
+	public const PAGINATE = 0x0001;
+	public const SEARCH = 0x0010;
+	public const ORDER_BY = 0x0100;
+	public const RESET = 0x1000;
+	public const ALL = 0x1111;
 
-	private string $type;
+	private int $type;
 
 	private bool $propagationStopped = false;
 
-	public function __construct(string $type)
+	public function __construct(int $type)
 	{
 		$this->type = $type;
 	}
 
-	public function getType(): string
+	public function getType(): int
 	{
 		return $this->type;
 	}

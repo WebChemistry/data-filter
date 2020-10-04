@@ -2,6 +2,7 @@
 
 namespace WebChemistry\DataFilter\Nette\Components;
 
+use InvalidArgumentException;
 use Nette\Application\UI\Control;
 use WebChemistry\DataFilter\DataFilter;
 use WebChemistry\DataFilter\State\StateChangedEvent;
@@ -14,7 +15,13 @@ final class PaginatorComponent extends Control implements PaginatorComponentInte
 
 	private StateEventDispatcher $stateEventDispatcher;
 
-	private string $file = __DIR__ . '/templates/paginator.latte';
+	/** @var string[] */
+	private array $templates = [
+		'default' => __DIR__ . '/templates/paginator.latte',
+		'bootstrap4' => __DIR__ . '/templates/paginator-bootstrap4.latte',
+	];
+
+	private string $template = 'default';
 
 	private string $appendItemsFile = __DIR__ . '/templates/paginator-appendItems.latte';
 
@@ -29,9 +36,14 @@ final class PaginatorComponent extends Control implements PaginatorComponentInte
 		$this->stateEventDispatcher = $stateEventDispatcher;
 	}
 
-	public function setFile(string $file): void
+	public function setTemplate(string $template): void
 	{
-		$this->file = $file;
+		$this->template = $template;
+	}
+
+	public function setTemplateFile(string $file, string $template = 'default'): void
+	{
+		$this->files[$template] = $file;
 	}
 
 	public function setAppendItemsFile(string $appendItemsFile): void
@@ -51,13 +63,13 @@ final class PaginatorComponent extends Control implements PaginatorComponentInte
 	{
 		$paginator = $this->dataFilter->getPaginator();
 		if (!$paginator || $paginator->getPageCount() < 2) {
-			return;
+			//return;
 		}
 
 		if ($this->appendItemsCaption) {
 			$this->renderAppendItems(...$args);
 		} else {
-			$this->renderDefault();
+			$this->renderDefault(...$args);
 		}
 	}
 
@@ -154,12 +166,21 @@ final class PaginatorComponent extends Control implements PaginatorComponentInte
 		$template->render();
 	}
 
-	private function renderDefault()
+	private function renderDefault(?string $template = null)
 	{
 		$paginator = $this->dataFilter->getPaginator();
 
+		if ($template === null) {
+			$template = $this->template;
+		}
+
+		$file = $this->templates[$template] ?? null;
+		if (!$file) {
+			throw new InvalidArgumentException(sprintf('Template %s not exists', $template));
+		}
+
 		$template = $this->getTemplate();
-		$template->setFile($this->file);
+		$template->setFile($file);
 
 		$template->paginator = $paginator;
 		$template->steps = $this->getSteps();

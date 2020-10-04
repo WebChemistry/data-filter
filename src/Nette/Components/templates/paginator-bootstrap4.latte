@@ -1,0 +1,26 @@
+{*
+	int      $page actuall page
+	int      $pageCount total number of pages
+	bool     $ajax use ajax
+	int[]    $steps array of steps
+	?string  $nextLink next link
+	?string  $prevLink previous link
+*}
+
+<nav aria-label="...">
+	<ul class="pagination">
+		<li n:class="'page-item', !$prevLink ? disabled">
+			<a n:attr="href => $prevLink" n:class="'page-link', $ajax ? ajax" aria-label="Previous" tabindex="-1">
+				<span aria-hidden="true">&laquo;</span>
+			</a>
+		</li>
+		<li n:foreach="$steps as $step" n:class="'page-item', $step === $page ? active">
+			<a n:class="'page-link', $ajax ? ajax" href="{$control->stepLink($step)}">{$step}</a>
+		</li>
+		<li n:class="'page-item', !$nextLink ? disabled">
+			<a n:attr="href => $prevLink" n:class="'page-link', $ajax ? ajax" aria-label="Next">
+				<span aria-hidden="true">&raquo;</span>
+			</a>
+		</li>
+	</ul>
+</nav>

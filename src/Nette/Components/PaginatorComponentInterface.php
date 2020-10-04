@@ -8,7 +8,9 @@ use Nette\ComponentModel\IComponent;
 interface PaginatorComponentInterface extends IComponent, IRenderable
 {
 
-	public function setFile(string $file): void;
+	public function setTemplate(string $template): void;
+
+	public function setTemplateFile(string $file, string $template = 'default'): void;
 
 	public function setAppendItemsCaption(?string $caption): void;
 
