@@ -14,4 +14,6 @@ interface PaginatorComponentInterface extends IComponent, IRenderable
 
 	public function setAppendItemsCaption(?string $caption): void;
 
+	public function setPrependItemsCaption(?string $caption): void;
+
 }

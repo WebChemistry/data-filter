@@ -9,11 +9,11 @@ final class OrderBy
 
 	private string $label;
 
-	/** @var string[] */
+	/** @var string[]|mixed[] */
 	private array $value;
 
 	/**
-	 * @param string[] $value
+	 * @param string[]|mixed[] $value
 	 */
 	public function __construct(string $id, string $label, array $value)
 	{
@@ -33,7 +33,7 @@ final class OrderBy
 	}
 
 	/**
-	 * @return string[]
+	 * @return string[]|mixed[]
 	 */
 	public function getValue(): array
 	{

@@ -25,7 +25,11 @@ final class PaginatorComponent extends Control implements PaginatorComponentInte
 
 	private string $appendItemsFile = __DIR__ . '/templates/paginator-appendItems.latte';
 
+	private string $prependItemsFile = __DIR__ . '/templates/paginator-prependItems.latte';
+
 	private ?string $appendItemsCaption = null;
+
+	private ?string $prependItemsCaption = null;
 
 	/** @var int[] */
 	private array $steps;
@@ -53,7 +57,20 @@ final class PaginatorComponent extends Control implements PaginatorComponentInte
 
 	public function setAppendItemsCaption(?string $caption): void
 	{
+		if ($this->prependItemsCaption) {
+			throw new InvalidArgumentException('Cannot combine prepend items with append items');
+		}
+
 		$this->appendItemsCaption = $caption;
+	}
+
+	public function setPrependItemsCaption(?string $caption): void
+	{
+		if ($this->appendItemsCaption) {
+			throw new InvalidArgumentException('Cannot combine prepend items with append items');
+		}
+
+		$this->prependItemsCaption = $caption;
 	}
 
 	/**
@@ -63,11 +80,13 @@ final class PaginatorComponent extends Control implements PaginatorComponentInte
 	{
 		$paginator = $this->dataFilter->getPaginator();
 		if (!$paginator || $paginator->getPageCount() < 2) {
-			//return;
+			return;
 		}
 
 		if ($this->appendItemsCaption) {
 			$this->renderAppendItems(...$args);
+		} elseif ($this->prependItemsCaption) {
+			$this->renderPrependItems(...$args);
 		} else {
 			$this->renderDefault(...$args);
 		}
@@ -159,6 +178,27 @@ final class PaginatorComponent extends Control implements PaginatorComponentInte
 		$template->ajax = $this->dataFilter->getOptions()->isAjax();
 		$template->nextLink = $this->nextLink();
 		$template->appendItemsCaption = $this->appendItemsCaption;
+
+		$template->containerClass = $containerClass;
+		$template->buttonClass = $buttonClass;
+
+		$template->render();
+	}
+
+	private function renderPrependItems(?string $containerClass = null, ?string $buttonClass = null)
+	{
+		$paginator = $this->dataFilter->getPaginator();
+		if ($paginator->isLast()) {
+			return;
+		}
+
+		$template = $this->getTemplate();
+		$template->setFile($this->prependItemsFile);
+
+		$template->paginator = $paginator;
+		$template->ajax = $this->dataFilter->getOptions()->isAjax();
+		$template->nextLink = $this->nextLink();
+		$template->prependItemsCaption = $this->prependItemsCaption;
 
 		$template->containerClass = $containerClass;
 		$template->buttonClass = $buttonClass;
