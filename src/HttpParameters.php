@@ -2,6 +2,7 @@
 
 namespace WebChemistry\DataFilter;
 
+use LogicException;
 use WebChemistry\DataFilter\ValueObject\DataFilterOptionsInterface;
 use WebChemistry\DataFilter\ValueObject\OrderBy;
 use WebChemistry\DataFilter\ValueObject\SearchParameter;
@@ -71,7 +72,16 @@ class HttpParameters
 		$this->parameters['order'] = $this->options->getOrderByList()[$orderById] ?? null;
 	}
 
-	public function getOrderBy(): ?OrderBy
+	public function getOrderBy(): OrderBy
+	{
+		if (!$this->parameters['order']) {
+			throw new LogicException('Order by is null');
+		}
+		
+		return $this->parameters['order'];
+	}
+
+	public function getNullableOrderBy(): ?OrderBy
 	{
 		return $this->parameters['order'];
 	}
