@@ -8,12 +8,14 @@ use Nette\ComponentModel\IComponent;
 interface PaginatorComponentInterface extends IComponent, IRenderable
 {
 
-	public function setTemplate(string $template): void;
+	public function setTemplate(string $template): PaginatorComponentInterface;
 
-	public function setTemplateFile(string $file, string $template = 'default'): void;
+	public function setTemplateFile(string $file, string $template = 'default'): PaginatorComponentInterface;
 
-	public function setAppendItemsCaption(?string $caption): void;
+	public function setAppendItemsCaption(?string $caption): PaginatorComponentInterface;
 
-	public function setPrependItemsCaption(?string $caption): void;
+	public function setPrependItemsCaption(?string $caption): PaginatorComponentInterface;
+
+	public function setInfiniteScrollAttribute(bool $infiniteScrollAttribute = true): PaginatorComponentInterface;
 
 }

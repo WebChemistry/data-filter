@@ -3,6 +3,7 @@
 namespace WebChemistry\DataFilter\ValueObject;
 
 use InvalidArgumentException;
+use Nette\Application\UI\Form;
 
 final class DataFilterOptionsBuilder
 {
@@ -10,15 +11,42 @@ final class DataFilterOptionsBuilder
 	/** @var mixed[] */
 	private array $options = [
 		'ajax' => false,
+		'enabledLinkEvents' => false,
 		'limit' => null,
 		'orderBy' => [],
 		'defaultOrderBy' => null,
 		'limits' => [],
+		'links' => [],
+		'switchers' => [],
+		'forms' => [],
 	];
 
-	public function addLimit(int $limit): void
+	/** @var SwitcherCategory[] */
+	private array $switcherCategories = [];
+
+	public function enableLinkEvents(): void
 	{
-		$this->options['limits'][$limit] = $limit;
+		$this->options['enabledLinkEvents'] = true;
+	}
+
+	public function addForm(string $id, Form $form): void
+	{
+		$this->options['forms'][$id] = new FormObject($id, $form);
+	}
+
+	public function addSwitcher(string $id, string $caption, bool $default = false): Switcher
+	{
+		return $this->options['switchers'][$id] = new Switcher($id, $caption, $default);
+	}
+
+	public function addSwitcherCategory(string $category): SwitcherCategory
+	{
+		return $this->switcherCategories[$category] = new SwitcherCategory($category);
+	}
+
+	public function addLink(string $id, string $caption, $default = null): Link
+	{
+		return $this->options['links'][$id] = new Link($id, $caption, $default);
 	}
 
 	public function setLimit(int $limit): void
@@ -56,6 +84,16 @@ final class DataFilterOptionsBuilder
 
 	public function build(): DataFilterOptionsInterface
 	{
+		if ($this->options['ajax']) {
+			$this->options['enabledLinkEvents'] = true;
+		}
+
+		foreach ($this->switcherCategories as $category) {
+			foreach ($category->getSwitchers() as $switcher) {
+				$this->options['switchers'][$switcher->getId()] = $switcher;
+			}
+		}
+
 		return new DataFilterOptions($this->options);
 	}
 

@@ -4,9 +4,10 @@ namespace WebChemistry\DataFilter\Utility;
 
 use Nette\Application\IPresenter;
 use Nette\Application\UI\Control;
+use WebChemistry\DataFilter\DataFilter;
 use WebChemistry\DataFilter\State\StateChangedEvent;
 
-final class RedrawStateChangedEventListenerFactory
+final class RedrawStateChangedUtility
 {
 
 	private IPresenter $presenter;
@@ -41,7 +42,21 @@ final class RedrawStateChangedEventListenerFactory
 		return $this;
 	}
 
-	public function createListener(): callable
+	public function redrawAppend(string $appendSnippet, string $wrapperSnippet, string $buttonSnippet): self
+	{
+		$this->redrawSnippetWhen(StateChangedEvent::PAGINATE, $appendSnippet)
+			->redrawSnippetExcept(StateChangedEvent::PAGINATE, $wrapperSnippet)
+			->redrawSnippetWhen(StateChangedEvent::ALL, $buttonSnippet);
+
+		return $this;
+	}
+
+	public function apply(DataFilter $dataFilter): void
+	{
+		$dataFilter->getEventDispatcher()->addEventListener(StateChangedEvent::class, $this->createListener());
+	}
+
+	private function createListener(): callable
 	{
 		return function (StateChangedEvent $event): void {
 			if (!$this->presenter->isAjax()) {

@@ -2,88 +2,83 @@
 
 namespace WebChemistry\DataFilter;
 
+use InvalidArgumentException;
 use LogicException;
+use WebChemistry\DataFilter\HttpParameter\FormsHttpParameter;
+use WebChemistry\DataFilter\HttpParameter\HttpParameterInterface;
+use WebChemistry\DataFilter\HttpParameter\LimitHttpParameter;
+use WebChemistry\DataFilter\HttpParameter\LinksHttpParameter;
+use WebChemistry\DataFilter\HttpParameter\OrderByHttpParameter;
+use WebChemistry\DataFilter\HttpParameter\PageHttpParameter;
+use WebChemistry\DataFilter\HttpParameter\SearchHttpParameter;
+use WebChemistry\DataFilter\HttpParameter\SwitchersHttpParameter;
 use WebChemistry\DataFilter\ValueObject\DataFilterOptionsInterface;
+use WebChemistry\DataFilter\ValueObject\Link;
+use WebChemistry\DataFilter\ValueObject\LinkGroup;
 use WebChemistry\DataFilter\ValueObject\OrderBy;
 use WebChemistry\DataFilter\ValueObject\SearchParameter;
 
 class HttpParameters
 {
 
-	private DataFilterOptionsInterface $options;
-
-	/** @var mixed[]|null */
+	/** @var HttpParameterInterface[] */
 	private array $parameters;
 
 	public function __construct(DataFilterOptionsInterface $options)
 	{
-		$this->options = $options;
-
-		$this->reset();
+		$this->parameters = [
+			LimitHttpParameter::class => new LimitHttpParameter($options->getLimit()),
+			OrderByHttpParameter::class => new OrderByHttpParameter($options->getDefaultOrderBy(), $options->getOrderByList()),
+			PageHttpParameter::class => new PageHttpParameter(),
+			SearchHttpParameter::class => new SearchHttpParameter(),
+			LinksHttpParameter::class => new LinksHttpParameter($options->getLinks()),
+			SwitchersHttpParameter::class => new SwitchersHttpParameter($options->getSwitchers()),
+			FormsHttpParameter::class => new FormsHttpParameter($options->getForms()),
+		];
 	}
 
 	public function reset(): void
 	{
-		$this->parameters = [
-			'search' => new SearchParameter(null),
-			'order' => null,
-			'limit' => null,
-			'page' => 1,
-		];
-	}
-
-	public function getAll(): array
-	{
-		return $this->parameters;
-	}
-
-	public function getLimit(): ?int
-	{
-		return $this->parameters['limit'];
-	}
-
-	public function setPage(int $page): void
-	{
-		$this->parameters['page'] = max(1, $page);
-	}
-
-	public function getPage(): int
-	{
-		return $this->parameters['page'];
+		foreach ($this->parameters as $parameter) {
+			$parameter->reset();
+		}
 	}
 
 	public function getSearch(): SearchParameter
 	{
-		return $this->parameters['search'];
+		return $this->getParameter(SearchHttpParameter::class)
+			->getValue();
 	}
 
-	public function paramIssetAndNum(array $params, string $name): bool
+	public function getForms(): FormsHttpParameter
 	{
-		return isset($params[$name]) && is_numeric($params[$name]);
+		return $this->getParameter(FormsHttpParameter::class);
 	}
 
-	public function setSearch(?string $search): void
+	public function getSwitchers(): SwitchersHttpParameter
 	{
-		$this->parameters['search'] = new SearchParameter($search);
-	}
-
-	public function setOrderBy(string $orderById): void
-	{
-		$this->parameters['order'] = $this->options->getOrderByList()[$orderById] ?? null;
+		return $this->getParameter(SwitchersHttpParameter::class);
 	}
 
 	public function getOrderBy(): OrderBy
 	{
-		if (!$this->parameters['order']) {
+		$order = $this->getParameter(OrderByHttpParameter::class)
+			->getValue();
+
+		if (!$order) {
 			throw new LogicException('Order by is null');
 		}
-		
-		return $this->parameters['order'];
+
+		return $order;
 	}
 
-	public function getNullableOrderBy(): ?OrderBy
+	public function getParameter(string $class): HttpParameterInterface
 	{
-		return $this->parameters['order'];
+		if (!isset($this->parameters[$class])) {
+			throw new InvalidArgumentException(sprintf('Http parameters %s not exists', $class));
+		}
+
+		return $this->parameters[$class];
 	}
 
 	/**
@@ -92,15 +87,8 @@ class HttpParameters
 	 */
 	public function loadState(array $params): void
 	{
-		$this->parameters = [
-			'search' => new SearchParameter($params['search'] ?? null),
-			'order' => $this->options->getDefaultOrderBy(),
-			'limit' => $this->paramIssetAndNum($params, 'limit') ? max(1, (int) $params['limit']) : $this->options->getLimit(),
-			'page' => $this->paramIssetAndNum($params, 'page') ? max(1, (int) $params['page']) : 1,
-		];
-
-		if (isset($params['order'])) {
-			$this->setOrderBy($params['order']);
+		foreach ($this->parameters as $parameter) {
+			$parameter->loadState($params);
 		}
 	}
 
@@ -109,26 +97,12 @@ class HttpParameters
 	 */
 	public function saveState(): array
 	{
-		$params = $this->parameters;
-		$params['search'] = $params['search']->get();
-
-		if ($params['page'] <= 1) {
-			unset($params['page']);
+		$params = [];
+		foreach ($this->parameters as $parameter) {
+			$params = $parameter->saveState($params);
 		}
 
-		if ($params['limit'] === $this->options->getLimit()) {
-			unset($params['limit']);
-		}
-
-		if ($params['order'] instanceof OrderBy) {
-			$params['order'] = $params['order']->getId();
-		}
-
-		if (($orderBy = $this->options->getDefaultOrderBy()) && $orderBy->getId() === $params['order']) {
-			unset($params['order']);
-		}
-
-		return array_filter($params, fn ($value) => $value !== null);
+		return $params;
 	}
 
 }

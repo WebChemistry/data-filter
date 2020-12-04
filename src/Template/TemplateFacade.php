@@ -7,7 +7,7 @@ use WebChemistry\DataFilter\DataFilter;
 class TemplateFacade
 {
 
-	private DataFilter $dataFilter;
+	protected DataFilter $dataFilter;
 
 	public function __construct(DataFilter $dataFilter)
 	{
@@ -17,6 +17,11 @@ class TemplateFacade
 	public function getData(): iterable
 	{
 		return $this->dataFilter->getData();
+	}
+
+	public function getItemCount(): int
+	{
+		return $this->dataFilter->getItemCount();
 	}
 
 }

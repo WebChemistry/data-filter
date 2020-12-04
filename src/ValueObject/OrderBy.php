@@ -10,12 +10,12 @@ final class OrderBy
 	private string $label;
 
 	/** @var string[]|mixed[] */
-	private array $value;
+	private ?array $value;
 
 	/**
-	 * @param string[]|mixed[] $value
+	 * @param string[]|mixed[]|null $value
 	 */
-	public function __construct(string $id, string $label, array $value)
+	public function __construct(string $id, string $label, ?array $value = null)
 	{
 		$this->id = $id;
 		$this->label = $label;
@@ -33,9 +33,9 @@ final class OrderBy
 	}
 
 	/**
-	 * @return string[]|mixed[]
+	 * @return string[]|mixed[]|null
 	 */
-	public function getValue(): array
+	public function getValue(): ?array
 	{
 		return $this->value;
 	}

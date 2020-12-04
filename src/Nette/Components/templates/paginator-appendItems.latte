@@ -5,5 +5,5 @@
 *}
 
 <div n:class="'data-filter-prepend-items', $containerClass">
-	<a href="{$nextLink}" n:class="$ajax ? 'ajax', $buttonClass">{$appendItemsCaption}</a>
+	<a href="{$nextLink}" n:attr="'data-infinite-scroll' => $infiniteScrollAttribute" n:class="$ajax ? 'ajax', $buttonClass">{$appendItemsCaption}</a>
 </div>

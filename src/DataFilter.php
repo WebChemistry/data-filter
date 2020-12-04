@@ -4,7 +4,9 @@ namespace WebChemistry\DataFilter;
 
 use Nette\Utils\Paginator;
 use WebChemistry\DataFilter\DataSource\DataSourceInterface;
-use WebChemistry\DataFilter\State\StateEventDispatcher;
+use WebChemistry\DataFilter\EventDispatcher\EventDispatcher;
+use WebChemistry\DataFilter\HttpParameter\LimitHttpParameter;
+use WebChemistry\DataFilter\HttpParameter\PageHttpParameter;
 use WebChemistry\DataFilter\ValueObject\DataFilterOptionsInterface;
 
 class DataFilter
@@ -18,6 +20,8 @@ class DataFilter
 
 	private iterable $data;
 
+	private int $itemCount;
+
 	private DataSourceInterface $dataSource;
 
 	private Paginator $paginator;
@@ -26,7 +30,7 @@ class DataFilter
 
 	private DataFilterOptionsInterface $options;
 
-	private StateEventDispatcher $stateEventDispatcher;
+	private EventDispatcher $eventDispatcher;
 
 	/**
 	 * @var callable(): DataSourceInterface $dataSourceFactory
@@ -36,13 +40,13 @@ class DataFilter
 		$this->dataSourceFactory = $dataSourceFactory;
 		$this->options = $options;
 
-		$this->stateEventDispatcher = new StateEventDispatcher();
 		$this->httpParameters = new HttpParameters($options);
+		$this->eventDispatcher = new EventDispatcher();
 	}
 
-	public function getStateEventDispatcher(): StateEventDispatcher
+	public function getEventDispatcher(): EventDispatcher
 	{
-		return $this->stateEventDispatcher;
+		return $this->eventDispatcher;
 	}
 
 	public function getHttpParameters(): HttpParameters
@@ -75,11 +79,20 @@ class DataFilter
 			);
 
 			if ($this->dataDecorator) {
-				$this->data = ($this->dataDecorator)($this->data);
+				$this->data = ($this->dataDecorator)($this->data, $this);
 			}
 		}
 
 		return $this->data;
+	}
+
+	public function getItemCount(): int
+	{
+		if (!isset($this->itemCount)) {
+			$this->itemCount = $this->getDataSource()->getItemCount();
+		}
+
+		return $this->itemCount;
 	}
 
 	public function getPaginator(): ?Paginator
@@ -91,8 +104,12 @@ class DataFilter
 		if (!isset($this->paginator)) {
 			$this->paginator = new Paginator();
 
-			$this->paginator->setPage($this->httpParameters->getPage());
-			$this->paginator->setItemsPerPage($this->httpParameters->getLimit() ?? $this->options->getLimit());
+			$this->paginator->setPage(
+				$this->httpParameters->getParameter(PageHttpParameter::class)->getValue()
+			);
+			$this->paginator->setItemsPerPage(
+				$this->httpParameters->getParameter(LimitHttpParameter::class)->getValue()
+			);
 			$this->paginator->setItemCount($this->getDataSource()->getItemCount());
 		}
 
