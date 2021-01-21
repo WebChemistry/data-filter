@@ -41,10 +41,6 @@ class DataFilterComponent extends Control
 			null,
 			fn (EventInterface $event) => $this->dataFilter->getEventDispatcher()->dispatch($event)
 		);
-		$this->eventDispatcher->addEventListener(
-			StateChangedEvent::class,
-			fn (StateChangedEvent $event) => $this->dataFilter->getEventDispatcher()->dispatch($event)
-		);
 		$this->eventDispatcher->addEventListener(StateChangedEvent::class, function (): void {
 			if (!$this->getPresenter()->isAjax()) {
 				$this->redirect('this');

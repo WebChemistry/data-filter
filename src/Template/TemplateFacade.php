@@ -19,6 +19,11 @@ class TemplateFacade
 		return $this->dataFilter->getData();
 	}
 
+	public function getLazyData(): iterable
+	{
+		return $this->dataFilter->getLazyData();
+	}
+
 	public function getItemCount(): int
 	{
 		return $this->dataFilter->getItemCount();

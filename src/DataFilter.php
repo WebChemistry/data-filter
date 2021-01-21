@@ -7,6 +7,7 @@ use WebChemistry\DataFilter\DataSource\DataSourceInterface;
 use WebChemistry\DataFilter\EventDispatcher\EventDispatcher;
 use WebChemistry\DataFilter\HttpParameter\LimitHttpParameter;
 use WebChemistry\DataFilter\HttpParameter\PageHttpParameter;
+use WebChemistry\DataFilter\Utility\CallbackIterator;
 use WebChemistry\DataFilter\ValueObject\DataFilterOptionsInterface;
 
 class DataFilter
@@ -66,6 +67,15 @@ class DataFilter
 	public function getOptions(): DataFilterOptionsInterface
 	{
 		return $this->options;
+	}
+
+	public function getLazyData(): iterable
+	{
+		if (isset($this->data)) {
+			return $this->data;
+		}
+
+		return new CallbackIterator(fn () => $this->getData());
 	}
 
 	public function getData(): iterable
