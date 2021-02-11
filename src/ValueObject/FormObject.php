@@ -18,7 +18,16 @@ final class FormObject
 	{
 		$this->id = $id;
 		$this->form = $form;
-		$this->defaults = $this->form->getValues('array');
+		$this->defaults = $this->getDefaultValues();
+	}
+
+	private function getDefaultValues(): array
+	{
+		if (method_exists($this->form, 'getUnsafeValues')) {
+			return $this->form->getUnsafeValues('array');
+		} else {
+			return $this->form->getValues('array');
+		}
 	}
 
 	public function getId(): string
