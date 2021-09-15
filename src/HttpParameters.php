@@ -72,6 +72,11 @@ class HttpParameters
 		return $order;
 	}
 
+	/**
+	 * @template T
+	 * @param class-string<T> $class
+	 * @return T
+	 */
 	public function getParameter(string $class): HttpParameterInterface
 	{
 		if (!isset($this->parameters[$class])) {

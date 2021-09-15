@@ -13,12 +13,15 @@ final class Switcher
 
 	private ?string $category;
 
-	public function __construct(string $id, string $caption, bool $default, ?string $category = null)
+	private array $options;
+
+	public function __construct(string $id, string $caption, bool $default, ?string $category = null, array $options = [])
 	{
 		$this->id = $id;
 		$this->caption = $caption;
 		$this->default = $default;
 		$this->category = $category;
+		$this->options = $options;
 	}
 
 	public function getCategory(): ?string
@@ -39,6 +42,16 @@ final class Switcher
 	public function getDefault(): bool
 	{
 		return $this->default;
+	}
+
+	public function getOptions(): array
+	{
+		return $this->options;
+	}
+
+	public function getOption(string|int $index): mixed
+	{
+		return $this->options[$index] ?? null;
 	}
 
 }

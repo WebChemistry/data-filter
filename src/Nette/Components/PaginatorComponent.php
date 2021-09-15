@@ -52,7 +52,7 @@ final class PaginatorComponent extends Control implements PaginatorComponentInte
 
 	public function setTemplateFile(string $file, string $template = 'default'): self
 	{
-		$this->files[$template] = $file;
+		$this->templates[$template] = $file;
 
 		return $this;
 	}
@@ -138,6 +138,19 @@ final class PaginatorComponent extends Control implements PaginatorComponentInte
 		$page = $this->dataFilter->getHttpParameters()->getParameter(PageHttpParameter::class)->getValue();
 		if ($page < $this->dataFilter->getPaginator()->getPageCount()) {
 			return $this->stepLink($page + 1);
+		}
+
+		return null;
+	}
+
+	/**
+	 * @return int|null
+	 */
+	public function nextPage(): ?int
+	{
+		$page = $this->dataFilter->getHttpParameters()->getParameter(PageHttpParameter::class)->getValue();
+		if ($page < $this->dataFilter->getPaginator()->getPageCount()) {
+			return $page + 1;
 		}
 
 		return null;

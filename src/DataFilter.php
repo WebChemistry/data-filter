@@ -121,7 +121,7 @@ class DataFilter
 				$this->httpParameters->getParameter(LimitHttpParameter::class)->getValue()
 			);
 			$this->paginator->setItemCount($this->getDataSource()->getItemCount());
-		}
+ 		}
 
 		return $this->paginator;
 	}

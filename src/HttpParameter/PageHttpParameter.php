@@ -9,6 +9,7 @@ final class PageHttpParameter implements HttpParameterInterface
 
 	private int $value = 1;
 
+
 	public function setValue(int $value): void
 	{
 		$this->value = max($value, 1);
@@ -21,7 +22,7 @@ final class PageHttpParameter implements HttpParameterInterface
 
 	public function reset(): void
 	{
-		$this->value = 1;
+		$this->setValue($this->value);
 	}
 
 	public function loadState(array $params): void

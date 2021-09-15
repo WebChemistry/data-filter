@@ -21,7 +21,7 @@ class SwitcherTemplate
 	{
 		return $this->switcher->getSwitcher()->getId();
 	}
-	
+
 	public function getCategory(): ?string
 	{
 		return $this->switcher->getSwitcher()->getCategory();
@@ -40,6 +40,11 @@ class SwitcherTemplate
 	public function getUrl(): string
 	{
 		return $this->url;
+	}
+
+	public function getOption(string|int $index): mixed
+	{
+		return $this->switcher->getSwitcher()->getOption($index);
 	}
 
 }

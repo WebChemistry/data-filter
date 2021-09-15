@@ -12,6 +12,8 @@ interface PaginatorComponentInterface extends IComponent, IRenderable
 
 	public function setTemplateFile(string $file, string $template = 'default'): PaginatorComponentInterface;
 
+	public function setAppendItemsFile(string $appendItemsFile): PaginatorComponentInterface;
+
 	public function setAppendItemsCaption(?string $caption): PaginatorComponentInterface;
 
 	public function setPrependItemsCaption(?string $caption): PaginatorComponentInterface;

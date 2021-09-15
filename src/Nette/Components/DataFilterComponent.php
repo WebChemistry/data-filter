@@ -53,6 +53,16 @@ class DataFilterComponent extends Control
 		return $this->dataFilter;
 	}
 
+	public function getData(): iterable
+	{
+		return $this->dataFilter->getData();
+	}
+
+	public function getLazyData(): iterable
+	{
+		return $this->dataFilter->getLazyData();
+	}
+
 	public function getFacade(): NetteTemplateFacade
 	{
 		return $this->templateFacade;

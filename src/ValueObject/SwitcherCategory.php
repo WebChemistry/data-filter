@@ -15,9 +15,9 @@ final class SwitcherCategory
 		$this->category = $category;
 	}
 
-	public function addSwitcher(string $id, string $caption, bool $default = false): self
+	public function addSwitcher(string $id, string $caption, bool $default = false, array $options = []): self
 	{
-		$this->switchers[$id] = new Switcher($this->category . '_' . $id, $caption, $default, $this->category);
+		$this->switchers[$id] = new Switcher($this->category . '_' . $id, $caption, $default, $this->category, $options);
 
 		return $this;
 	}

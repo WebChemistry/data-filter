@@ -29,4 +29,15 @@ class TemplateFacade
 		return $this->dataFilter->getItemCount();
 	}
 
+	public function hasPaginator(): bool
+	{
+		$paginator = $this->dataFilter->getPaginator();
+
+		if (!$paginator) {
+			return false;
+		}
+
+		return $paginator->getLastPage() === 1;
+	}
+
 }
