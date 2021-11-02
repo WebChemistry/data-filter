@@ -212,7 +212,7 @@ class DataFilterComponent extends Control
 
 	public function getOrderBy(string $id): OrderByTemplate
 	{
-		$httpParameter = $this->dataFilter->getHttpParameters()->getParameter(OrderByHttpParameter::class);
+		$httpParameter = $this->dataFilter->getHttpParameters()->getOrderBy();
 		$orderBy = $this->dataFilter->getOptions()->getOrderBy($id);
 
 		if (!$this->dataFilter->getOptions()->isEnabledLinkEvents()) {
@@ -223,14 +223,12 @@ class DataFilterComponent extends Control
 			$url = $this->link('orderBy!', $id);
 		}
 
-		return new OrderByTemplate($orderBy, $url, $httpParameter->getValue() === $orderBy);
+		return new OrderByTemplate($orderBy, $url, $httpParameter->isActive($orderBy));
 	}
 
 	public function getLink(string $id, $value): LinkTemplate
 	{
-		$httpParameter = $this->dataFilter->getHttpParameters()->getParameter(LinksHttpParameter::class);
-		$collection = $httpParameter->getValue();
-		$link = $collection->get($id);
+		$link = $this->dataFilter->getHttpParameters()->getLinks()->getLink($id);
 
 		if (!$this->dataFilter->getOptions()->isEnabledLinkEvents()) {
 			$url = $this->link('this', [
@@ -245,9 +243,8 @@ class DataFilterComponent extends Control
 
 	public function getSwitcher(string $id): SwitcherTemplate
 	{
-		$httpParameter = $this->dataFilter->getHttpParameters()->getParameter(SwitchersHttpParameter::class);
-		$collection = $httpParameter->getValue();
-		$switcher = $collection->get($id);
+		$httpParameter = $this->dataFilter->getHttpParameters()->getSwitchers();
+		$switcher = $httpParameter->getSwitcher($id);
 
 		if (!$this->dataFilter->getOptions()->isEnabledLinkEvents()) {
 			$url = $this->link('this', [
@@ -275,10 +272,10 @@ class DataFilterComponent extends Control
 
 	public function handleLink(string $id, $val)
 	{
-		$httpParameter = $this->dataFilter->getHttpParameters()->getParameter(LinksHttpParameter::class);
-		$collection = $httpParameter->getValue();
+		$links = $this->dataFilter->getHttpParameters()->getLinks();
+
 		try {
-			$link = $collection->get($id);
+			$link = $links->getLink($id);
 		} catch (InvalidArgumentException $exception) {
 			$this->redirect('this');
 		}
@@ -290,10 +287,10 @@ class DataFilterComponent extends Control
 
 	public function handleSwitch(string $id, bool $val)
 	{
-		$httpParameter = $this->dataFilter->getHttpParameters()->getParameter(SwitchersHttpParameter::class);
-		$collection = $httpParameter->getValue();
+		$httpParameter = $this->dataFilter->getHttpParameters()->getSwitchers();
+
 		try {
-			$switcher = $collection->get($id);
+			$switcher = $httpParameter->getSwitcher($id);
 		} catch (InvalidArgumentException $exception) {
 			$this->redirect('this');
 		}
@@ -306,7 +303,7 @@ class DataFilterComponent extends Control
 
 	public function handleOrderBy(string $id)
 	{
-		$httpParameter = $this->dataFilter->getHttpParameters()->getParameter(OrderByHttpParameter::class);
+		$httpParameter = $this->dataFilter->getHttpParameters()->getOrderBy();
 
 		try {
 			$orderBy = $this->dataFilter->getOptions()->getOrderBy($id);

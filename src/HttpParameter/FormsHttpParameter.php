@@ -2,39 +2,59 @@
 
 namespace WebChemistry\DataFilter\HttpParameter;
 
-use WebChemistry\DataFilter\HttpParameter\ValueObject\FormCollection;
+use InvalidArgumentException;
+use WebChemistry\DataFilter\HttpParameter\ValueObject\FormParameter;
+use WebChemistry\DataFilter\ValueObject\DataFilterOptionsInterface;
 
 final class FormsHttpParameter implements HttpParameterInterface
 {
 
-	private FormCollection $value;
+	/** @var FormParameter[] */
+	private array $forms = [];
 
-	/**
-	 * @param Link[] $links
-	 */
-	public function __construct(array $links)
+	public function __construct(DataFilterOptionsInterface $options)
 	{
-		$this->value = new FormCollection($links, 'form_');
+		foreach ($options->getForms() as $form) {
+			$this->forms[] = new FormParameter($form, $this->getHttpId());
+		}
 	}
 
-	public function getValue(): FormCollection
+	public function getHttpId(): string
 	{
-		return $this->value;
+		return 'form_';
+	}
+
+	public function hasForm(string $form): bool
+	{
+		return isset($this->forms[$form]);
+	}
+
+	public function getForm(string $form): FormParameter
+	{
+		return $this->forms[$form] ?? throw new InvalidArgumentException(sprintf('Form "%s" does not exist.', $form));
 	}
 
 	public function reset(): void
 	{
-		$this->value->reset();
+		foreach ($this->forms as $form) {
+			$form->reset();
+		}
 	}
 
 	public function loadState(array $params): void
 	{
-		$this->value->loadState($params);
+		foreach ($this->forms as $form) {
+			$form->loadState($params);
+		}
 	}
 
 	public function saveState(array $params): array
 	{
-		return $this->value->saveState($params);
+		foreach ($this->forms as $form) {
+			$params = $form->saveState($params);
+		}
+
+		return $params;
 	}
 
 }

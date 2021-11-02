@@ -33,18 +33,23 @@ final class SearchHttpParameter implements HttpParameterInterface
 
 	public function loadState(array $params): void
 	{
-		if (isset($params['search'])) {
-			$this->setValue($params['search']);
+		if (isset($params[$this->getHttpId()])) {
+			$this->setValue($params[$this->getHttpId()]);
 		}
 	}
 
 	public function saveState(array $params): array
 	{
 		if ($this->value->isOk()) {
-			$params['search'] = $this->value->get();
+			$params[$this->getHttpId()] = $this->value->get();
 		}
 
 		return $params;
+	}
+
+	public function getHttpId(): string
+	{
+		return 'search';
 	}
 
 }

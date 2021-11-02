@@ -86,6 +86,7 @@ final class DataFilterOptions implements DataFilterOptionsInterface
 			'limit' => Expect::int(null)->min(1)->nullable(),
 			'orderBy' => Expect::arrayOf(Expect::type(OrderBy::class)),
 			'defaultOrderBy' => Expect::type(OrderBy::class)->nullable()->default(null),
+			'nullableOrderBy' => Expect::bool(false),
 			'limits' => Expect::arrayOf('int'),
 			'links' => Expect::arrayOf(Expect::type(Link::class)),
 			'switchers' => Expect::arrayOf(Expect::type(Switcher::class)),

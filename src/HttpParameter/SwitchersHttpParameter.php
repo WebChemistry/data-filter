@@ -2,40 +2,61 @@
 
 namespace WebChemistry\DataFilter\HttpParameter;
 
+use InvalidArgumentException;
 use WebChemistry\DataFilter\HttpParameter\ValueObject\SwitcherCollection;
+use WebChemistry\DataFilter\HttpParameter\ValueObject\SwitcherParameter;
+use WebChemistry\DataFilter\ValueObject\DataFilterOptionsInterface;
 use WebChemistry\DataFilter\ValueObject\Switcher;
 
 final class SwitchersHttpParameter implements HttpParameterInterface
 {
 
-	private SwitcherCollection $value;
+	/** @var SwitcherParameter[] */
+	private array $switchers = [];
 
-	/**
-	 * @param Switcher[] $switchers
-	 */
-	public function __construct(array $switchers)
+	public function __construct(DataFilterOptionsInterface $options)
 	{
-		$this->value = new SwitcherCollection($switchers, 'switcher_');
+		foreach ($options->getSwitchers() as $switcher) {
+			$this->switchers[] = new SwitcherParameter($switcher, $this->getHttpId());
+		}
 	}
 
-	public function getValue(): SwitcherCollection
+	public function getHttpId(): string
 	{
-		return $this->value;
+		return 'switcher_';
+	}
+
+	public function hasSwitcher(string $switcher): bool
+	{
+		return isset($this->switchers[$switcher]);
+	}
+
+	public function getSwitcher(string $switcher): SwitcherParameter
+	{
+		return $this->switchers[$switcher] ?? throw new InvalidArgumentException(sprintf('Switcher "%s" does not exist.', $switcher));
 	}
 
 	public function reset(): void
 	{
-		$this->value->reset();
+		foreach ($this->switchers as $switcher) {
+			$switcher->reset();
+		}
 	}
 
 	public function loadState(array $params): void
 	{
-		$this->value->loadState($params);
+		foreach ($this->switchers as $switcher) {
+			$switcher->loadState($params);
+		}
 	}
 
 	public function saveState(array $params): array
 	{
-		return $this->value->saveState($params);
+		foreach ($this->switchers as $switcher) {
+			$params = $switcher->saveState($params);
+		}
+
+		return $params;
 	}
 
 }

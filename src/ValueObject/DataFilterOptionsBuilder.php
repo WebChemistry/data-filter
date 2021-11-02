@@ -15,6 +15,7 @@ final class DataFilterOptionsBuilder
 		'limit' => null,
 		'orderBy' => [],
 		'defaultOrderBy' => null,
+		'nullableOrderBy' => false,
 		'limits' => [],
 		'links' => [],
 		'switchers' => [],
@@ -56,6 +57,10 @@ final class DataFilterOptionsBuilder
 
 	public function addOrderBy(OrderBy $order): void
 	{
+		if (!$this->options['nullableOrderBy'] && $this->options['defaultOrderBy'] === null) {
+			$this->options['defaultOrderBy'] = $order;
+		}
+
 		$this->options['orderBy'][$order->getId()] = $order;
 	}
 
@@ -68,13 +73,13 @@ final class DataFilterOptionsBuilder
 		$this->options['defaultOrderBy'] = $orderBy;
 	}
 
-	public function setFirstAsDefaultOrderBy(): void
+	public function setNullableOrderBy(bool $nullable): void
 	{
-		if (!$this->options['orderBy']) {
-			throw new InvalidArgumentException('Order by must not be empty');
-		}
+		$this->options['nullableOrderBy'] = $nullable;
 
-		$this->options['defaultOrderBy'] = current($this->options['orderBy']);
+		if ($this->options['nullableOrderBy']) {
+			$this->options['defaultOrderBy'] = null;
+		}
 	}
 
 	public function setAjax(bool $ajax = true): void

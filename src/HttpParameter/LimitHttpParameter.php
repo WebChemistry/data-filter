@@ -3,6 +3,7 @@
 namespace WebChemistry\DataFilter\HttpParameter;
 
 use WebChemistry\DataFilter\HttpParameter\Helper\HttpParameterHelper;
+use WebChemistry\DataFilter\ValueObject\DataFilterOptionsInterface;
 
 final class LimitHttpParameter implements HttpParameterInterface
 {
@@ -11,11 +12,16 @@ final class LimitHttpParameter implements HttpParameterInterface
 
 	private ?int $default;
 
-	public function __construct(?int $default)
+	public function __construct(DataFilterOptionsInterface $options)
 	{
-		$this->default = $default;
+		$this->default = $options->getLimit();
 
 		$this->reset();
+	}
+
+	public function getHttpId(): string
+	{
+		return 'limit';
 	}
 
 	public function getValue(): ?int
@@ -30,15 +36,15 @@ final class LimitHttpParameter implements HttpParameterInterface
 
 	public function loadState(array $params): void
 	{
-		if (HttpParameterHelper::issetAndNumeric($params, 'limit')) {
-			$this->value = max(1, (int) $params['limit']);
+		if (HttpParameterHelper::issetAndNumeric($params, $this->getHttpId())) {
+			$this->value = max(1, (int) $params[$this->getHttpId()]);
 		}
 	}
 
 	public function saveState(array $params): array
 	{
 		if ($this->value && $this->value !== $this->default) {
-			$params['limit'] = $this->value;
+			$params[$this->getHttpId()] = $this->value;
 		}
 
 		return $params;

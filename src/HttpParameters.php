@@ -13,10 +13,6 @@ use WebChemistry\DataFilter\HttpParameter\PageHttpParameter;
 use WebChemistry\DataFilter\HttpParameter\SearchHttpParameter;
 use WebChemistry\DataFilter\HttpParameter\SwitchersHttpParameter;
 use WebChemistry\DataFilter\ValueObject\DataFilterOptionsInterface;
-use WebChemistry\DataFilter\ValueObject\Link;
-use WebChemistry\DataFilter\ValueObject\LinkGroup;
-use WebChemistry\DataFilter\ValueObject\OrderBy;
-use WebChemistry\DataFilter\ValueObject\SearchParameter;
 
 class HttpParameters
 {
@@ -24,17 +20,35 @@ class HttpParameters
 	/** @var HttpParameterInterface[] */
 	private array $parameters;
 
+	/** @var array<string, bool> */
+	private array $ids = [];
+
 	public function __construct(DataFilterOptionsInterface $options)
 	{
-		$this->parameters = [
-			LimitHttpParameter::class => new LimitHttpParameter($options->getLimit()),
-			OrderByHttpParameter::class => new OrderByHttpParameter($options->getDefaultOrderBy(), $options->getOrderByList()),
-			PageHttpParameter::class => new PageHttpParameter(),
-			SearchHttpParameter::class => new SearchHttpParameter(),
-			LinksHttpParameter::class => new LinksHttpParameter($options->getLinks()),
-			SwitchersHttpParameter::class => new SwitchersHttpParameter($options->getSwitchers()),
-			FormsHttpParameter::class => new FormsHttpParameter($options->getForms()),
-		];
+		$this->addHttpParameter(new LimitHttpParameter($options));
+		$this->addHttpParameter(new OrderByHttpParameter($options));
+		$this->addHttpParameter(new PageHttpParameter($options));
+		$this->addHttpParameter(new SearchHttpParameter($options));
+		$this->addHttpParameter(new LinksHttpParameter($options));
+		$this->addHttpParameter(new SwitchersHttpParameter($options));
+		$this->addHttpParameter(new FormsHttpParameter($options));
+	}
+
+	/**
+	 * @return static
+	 */
+	public function addHttpParameter(HttpParameterInterface $httpParameter)
+	{
+		$id = $httpParameter->getHttpId();
+
+		if (isset($this->ids[$id])) {
+			throw new LogicException(sprintf('Http parameter with prefix "%s" already exists.', $id));
+		}
+
+		$this->parameters[$httpParameter::class] = $httpParameter;
+		$this->ids[$id] = true;
+
+		return $this;
 	}
 
 	public function reset(): void
@@ -44,10 +58,9 @@ class HttpParameters
 		}
 	}
 
-	public function getSearch(): SearchParameter
+	public function getSearch(): SearchHttpParameter
 	{
-		return $this->getParameter(SearchHttpParameter::class)
-			->getValue();
+		return $this->getParameter(SearchHttpParameter::class);
 	}
 
 	public function getForms(): FormsHttpParameter
@@ -60,16 +73,14 @@ class HttpParameters
 		return $this->getParameter(SwitchersHttpParameter::class);
 	}
 
-	public function getOrderBy(): OrderBy
+	public function getLinks(): LinksHttpParameter
 	{
-		$order = $this->getParameter(OrderByHttpParameter::class)
-			->getValue();
+		return $this->getParameter(LinksHttpParameter::class);
+	}
 
-		if (!$order) {
-			throw new LogicException('Order by is null');
-		}
-
-		return $order;
+	public function getOrderBy(): OrderByHttpParameter
+	{
+		return $this->getParameter(OrderByHttpParameter::class);
 	}
 
 	/**

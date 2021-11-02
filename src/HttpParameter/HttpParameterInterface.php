@@ -5,7 +5,7 @@ namespace WebChemistry\DataFilter\HttpParameter;
 interface HttpParameterInterface
 {
 
-	public function getValue();
+	public function getHttpId(): string;
 
 	public function reset(): void;
 

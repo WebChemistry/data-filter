@@ -2,41 +2,63 @@
 
 namespace WebChemistry\DataFilter\HttpParameter;
 
-use WebChemistry\DataFilter\HttpParameter\ValueObject\LinkCollection;
+use InvalidArgumentException;
 use WebChemistry\DataFilter\HttpParameter\ValueObject\LinkParameter;
+use WebChemistry\DataFilter\ValueObject\DataFilterOptionsInterface;
 use WebChemistry\DataFilter\ValueObject\Link;
 
 final class LinksHttpParameter implements HttpParameterInterface
 {
 
-	private LinkCollection $value;
+	/** @var LinkParameter[] */
+	private array $links = [];
 
 	/**
 	 * @param Link[] $links
 	 */
-	public function __construct(array $links)
+	public function __construct(DataFilterOptionsInterface $options)
 	{
-		$this->value = new LinkCollection($links, 'link_');
+		foreach ($options->getLinks() as $link) {
+			$this->links[$link->getId()] = new LinkParameter($link, $this->getHttpId());
+		}
 	}
 
-	public function getValue(): LinkCollection
+	public function getHttpId(): string
 	{
-		return $this->value;
+		return 'link_';
+	}
+
+	public function hasLink(string $link): bool
+	{
+		return isset($this->links[$link]);
+	}
+
+	public function getLink(string $link): LinkParameter
+	{
+		return $this->links[$link] ?? throw new InvalidArgumentException(sprintf('Link "%s" does not exist.', $link));
 	}
 
 	public function reset(): void
 	{
-		$this->value->reset();
+		foreach ($this->links as $link) {
+			$link->reset();
+		}
 	}
 
 	public function loadState(array $params): void
 	{
-		$this->value->loadState($params);
+		foreach ($this->links as $link) {
+			$link->loadState($params);
+		}
 	}
 
 	public function saveState(array $params): array
 	{
-		return $this->value->saveState($params);
+		foreach ($this->links as $link) {
+			$params = $link->saveState($params);
+		}
+
+		return $params;
 	}
 
 }

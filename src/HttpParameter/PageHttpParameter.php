@@ -9,7 +9,6 @@ final class PageHttpParameter implements HttpParameterInterface
 
 	private int $value = 1;
 
-
 	public function setValue(int $value): void
 	{
 		$this->value = max($value, 1);
@@ -27,18 +26,23 @@ final class PageHttpParameter implements HttpParameterInterface
 
 	public function loadState(array $params): void
 	{
-		if (HttpParameterHelper::issetAndNumeric($params, 'page')) {
-			$this->setValue((int) $params['page']);
+		if (HttpParameterHelper::issetAndNumeric($params, $this->getHttpId())) {
+			$this->setValue((int) $params[$this->getHttpId()]);
 		}
 	}
 
 	public function saveState(array $params): array
 	{
 		if ($this->value !== 1) {
-			$params['page'] = $this->value;
+			$params[$this->getHttpId()] = $this->value;
 		}
 
 		return $params;
+	}
+
+	public function getHttpId(): string
+	{
+		return 'page';
 	}
 
 }

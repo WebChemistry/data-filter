@@ -2,6 +2,8 @@
 
 namespace WebChemistry\DataFilter\HttpParameter;
 
+use LogicException;
+use WebChemistry\DataFilter\ValueObject\DataFilterOptionsInterface;
 use WebChemistry\DataFilter\ValueObject\OrderBy;
 
 final class OrderByHttpParameter implements HttpParameterInterface
@@ -14,15 +16,22 @@ final class OrderByHttpParameter implements HttpParameterInterface
 	/** @var OrderBy[] */
 	private array $list;
 
-	/**
-	 * @param OrderBy[] $list
-	 */
-	public function __construct(?OrderBy $default, array $list)
+	public function __construct(DataFilterOptionsInterface $options)
 	{
-		$this->default = $default;
-		$this->list = $list;
+		$this->default = $options->getDefaultOrderBy();
+		$this->list = $options->getOrderByList();
 
 		$this->reset();
+	}
+
+	public function getHttpId(): string
+	{
+		return 'order';
+	}
+
+	public function isActive(OrderBy $orderBy): bool
+	{
+		return $this->getValue() === $orderBy;
 	}
 
 	public function setValue(?OrderBy $orderBy): void
@@ -42,6 +51,11 @@ final class OrderByHttpParameter implements HttpParameterInterface
 		return $this->value;
 	}
 
+	public function getRequiredValue(): OrderBy
+	{
+		return $this->getValue() ?? throw new LogicException('Order by is not set.');
+	}
+
 	public function reset(): void
 	{
 		$this->value = $this->default;
@@ -49,23 +63,18 @@ final class OrderByHttpParameter implements HttpParameterInterface
 
 	public function loadState(array $params): void
 	{
-		if (isset($params['order'])) {
-			$this->setHttpValue($params['order']);
+		if (isset($params[$this->getHttpId()])) {
+			$this->setHttpValue($params[$this->getHttpId()]);
 		}
 	}
 
 	public function saveState(array $params): array
 	{
 		if ($this->value && $this->value !== $this->default) {
-			$params['order'] = $this->value->getId();
+			$params[$this->getHttpId()] = $this->value->getId();
 		}
 
 		return $params;
-	}
-
-	public function getHttpId(): string
-	{
-		return 'order';
 	}
 
 }
